@@ -1,0 +1,177 @@
+-- Bubblesort Algorithm model
+--
+-- author: Patrick Trentin
+--
+
+MODULE main
+VAR
+    arr : array 0..4 of 1..10;
+    proc_sort: process sort(arr);
+    global_state: {IN_PROCESS, COMPLETE};
+
+ASSIGN
+    init(arr[0]) := 4;
+    init(arr[1]) := 1;
+    init(arr[2]) := 3;
+    init(arr[3]) := 2;
+    init(arr[4]) := 5;
+
+    init(global_state) := IN_PROCESS;
+    next(global_state) := case
+        proc_sort.state = SORTED: COMPLETE;
+        TRUE: global_state;
+    esac;
+
+LTLSPEC
+    F G (global_state = COMPLETE)
+
+-- sorts the buffer using a very naive sorting algorithm
+MODULE sort(buffer, bufsize, sort_OK, sort_req)
+
+VAR
+  state: {wait,sort,subst,sort_ready};
+  buffer_aux: array 1..3 of {1,2,3,4};
+  ord : boolean;
+
+ASSIGN    
+  init(state) := wait;
+  init(ord) := FALSE;
+  next(state) :=
+    case
+     state = wait & sort_req : sort;
+     state = sort & ord : subst;
+     state = subst: sort_ready;
+     state = sort & !ord : sort;
+     state = sort_ready : wait;
+     TRUE :state;
+    esac; 
+    
+   next(buffer_aux[1]) :=
+    case
+     state= sort & buffer[2] > buffer[1] & bufsize > 1  : buffer[2];
+     TRUE : buffer[1];
+    esac;
+   next(buffer_aux[2]) :=
+    case
+     state = sort & buffer[2] > buffer[1] & bufsize > 1 : buffer[1];
+     state=sort & buffer[3] > buffer[2] & bufsize > 2: buffer[3];
+     TRUE : buffer[2];
+    esac;
+  next(buffer_aux[3]) :=
+    case
+     state=sort & buffer[3] > buffer[2] & bufsize > 2: buffer[2];
+     TRUE : buffer[3];
+    esac;
+   next(ord) :=
+      case
+       state=sort & buffer_aux[1] > buffer_aux[2] & buffer_aux[1] > buffer_aux[3] & buffer_aux [2] > buffer_aux[3] & bufsize = 3: TRUE;
+       state=sort & buffer_aux[1] > buffer_aux[2] & bufsize = 2: TRUE;
+       state=sort & (bufsize=1 | bufsize=0) : TRUE;
+      TRUE : ord; 
+      esac;
+   next(sort_OK) :=
+      case
+       state=sort_ready : TRUE;
+       TRUE : sort_OK;
+      esac;
+   next(sort_req) :=
+      case
+       state=sort_ready : FALSE;
+       TRUE : sort_req;
+      esac;
+   next(buffer[1]) :=
+     case
+       state=subst: buffer_aux[1];
+       TRUE : buffer[1];
+     esac;
+   next(buffer[2]) :=
+     case
+       state=subst: buffer_aux[2];
+       TRUE : buffer[2];
+     esac;
+   next(buffer[3]) :=
+     case
+       state=subst: buffer_aux[3];
+       TRUE : buffer[3];
+     esac;
+
+FAIRNESS
+ running
+
+SPEC
+    EF (state = sort)
+
+-- MODULE sort(arr)
+-- VAR
+--     i       : 0..4;
+--     swapped : boolean;
+--     state   : { SORTED, NOT_SORTED };
+
+-- DEFINE
+--     do_swap   := (i < 4) & arr[(i + 0) mod 5]  > arr[(i + 1) mod 5];
+--     do_ignore := (i < 4) & arr[(i + 0) mod 5] <= arr[(i + 1) mod 5];
+--     do_rewind := (i = 4) & swapped = TRUE;
+--     end_state := (i = 4) & swapped = FALSE;
+
+-- ASSIGN
+--     init(state) := NOT_SORTED;
+--     next(state) := case
+--         end_state : SORTED;
+--         TRUE: state;
+--     esac;
+
+--     init(i) := 0;
+--     next(i) := case
+--         end_state : i; -- end state
+--         TRUE      : (i + 1) mod 5;
+--     esac;
+
+--     init(swapped) := FALSE;
+--     next(swapped) := case
+--         (i < 4) & arr[(i + 0) mod 5] > arr[(i + 1) mod 5] : TRUE;
+--         do_rewind : FALSE;
+--         TRUE      : swapped;
+--     esac;
+
+-- -- swap two consequent elements if they are not
+-- -- correctly sorted relative to one another
+-- TRANS
+--     do_swap -> (
+--         next(arr[ (i + 4) mod 5 ]) = arr[ (i + 1) mod 5 ] &
+--         next(arr[ (i + 0) mod 5 ]) = arr[ (i + 0) mod 5 ] &
+--         next(arr[ (i + 1) mod 5 ]) = arr[ (i + 2) mod 5 ] &
+--         next(arr[ (i + 2) mod 5 ]) = arr[ (i + 3) mod 5 ] &
+--         next(arr[ (i + 3) mod 5 ]) = arr[ (i + 4) mod 5 ]
+--     );
+
+-- -- perform no action if two consequent elements are already
+-- -- sorted
+-- TRANS
+--     (do_ignore|do_rewind) -> (
+--         next(arr[ (i + 4) mod 5 ]) = arr[ (i + 0) mod 5 ] &
+--         next(arr[ (i + 0) mod 5 ]) = arr[ (i + 1) mod 5 ] &
+--         next(arr[ (i + 1) mod 5 ]) = arr[ (i + 2) mod 5 ] &
+--         next(arr[ (i + 2) mod 5 ]) = arr[ (i + 3) mod 5 ] &
+--         next(arr[ (i + 3) mod 5 ]) = arr[ (i + 4) mod 5 ]
+--     );
+
+--     -- perform no action if algorithm has finished
+-- TRANS
+--     (end_state) -> (
+--         next(arr[ (i + 0) mod 5 ]) = arr[ (i + 0) mod 5 ] &
+--         next(arr[ (i + 1) mod 5 ]) = arr[ (i + 1) mod 5 ] &
+--         next(arr[ (i + 2) mod 5 ]) = arr[ (i + 2) mod 5 ] &
+--         next(arr[ (i + 3) mod 5 ]) = arr[ (i + 3) mod 5 ] &
+--         next(arr[ (i + 4) mod 5 ]) = arr[ (i + 4) mod 5 ]
+--     );
+
+--     -- There exists no path in which the algorithm ends
+-- LTLSPEC ! F G end_state
+
+--     -- There exists no path in which the algorithm ends
+--     -- with a sorted array
+-- LTLSPEC ! F G (arr[0] <= arr[1] &
+--             arr[1] <= arr[2] &
+--             arr[2] <= arr[3] &
+--             arr[3] <= arr[4] &
+--             end_state)

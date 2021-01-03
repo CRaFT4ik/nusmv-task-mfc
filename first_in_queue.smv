@@ -1,0 +1,207 @@
+-- Coded by Eldar Timraleev © 2020-2021. --
+
+-- ----------------------------------------------------------------------
+-- Выбор первого клиента из очереди.
+
+-- ----------------------------------------------------------------------
+-- ------------------------------- MAIN
+-- ----------------------------------------------------------------------
+
+MODULE main
+
+VAR
+    -- Макс. количество клиентских процессов == количеству мест в зале ожидания.
+    client_1 : process client(1, M, self);
+    client_2 : process client(2, M, self);
+    client_3 : process client(3, M, self);
+    client_4 : process client(4, M, self);
+    client_5 : process client(5, M, self);
+
+    -- Замок для остановки хода глобального счетчика времени;
+    -- Каждый клиент обладает своим замком.
+    timer_lock : array 1.._M of boolean;
+
+    M : 0.._M;  -- Текущее количество свободных мест в зале ожидания;
+
+    -- NOT_COME     - клиент еще не пришел (его не существует);
+    -- JUST_COME    - клиент только пришел и ищет свободное место;
+    -- WAIT         - клиент ожидает обслуживания;
+    -- READY        - клиент принят на обслуживание и идет к окну;
+    -- SERVICING    - клиент обслуживается в данный момент;
+    -- SERVICED     - клиент обслужен и уходит;
+    -- COMPLAIN     - клиент пишет жалобу, не дождавшись обслуживания;
+    client_states : array 1.._M of { NOT_COME, JUST_COME, WAIT, READY, SERVICING, SERVICED, COMPLAIN };
+
+    -- Окна обслуживания: 0 - окно свободно; i - окно занято клиентом i.
+    windows : array 1..3 of 0.._M;
+
+DEFINE
+    _M := 5;    -- Макс. количество свободных мест в зале ожидания (равно кол-ву процессов-клиентов).
+    _K := 6;    -- Запас терпения клиента (>= 3).
+
+    -- Состояние отдельных окон.
+    win_1 := windows[1]; win_2 := windows[2]; win_3 := windows[3];
+
+    -- Имеется ли свободное окно.
+    free_windows := (win_1 = 0) | (win_2 = 0) | (win_3 = 0);
+
+    -- Есть возможность какому-то клиенту занять какое-то свободное окно.
+    can_take_window := (free_windows) & (M < _M);
+
+    -- Заблокирован ли глобальный счетчик времени.
+    -- Блокировка нужна, поскольку может возникнуть ситуация, когда, например, клиент находится в состояние "готов подойти к окну",
+    -- а выполнение все время передается процессу счетчика времени, в результате чего возникает бредовая ситуация, когда
+    -- клиент может бесконечно идти к окну обслуживания, занимая его и не обслуживаясь.
+    -- Или когда окно свободно, а тупой таймер все время занимает процессор, - тогда клиент не сможет занять окно.
+    is_timer_locked := can_take_window | timer_lock[1] | timer_lock[2] | timer_lock[3] | timer_lock[4] | timer_lock[5];
+
+    -- Можно ли уменшить счетчик ожидания для клиентов.
+    can_dec_1 := ((client_1.state = WAIT | client_1.state = SERVICING) & (client_1.K > 0)) & !is_timer_locked;
+    can_dec_2 := ((client_2.state = WAIT | client_2.state = SERVICING) & (client_2.K > 0)) & !is_timer_locked;
+    can_dec_3 := ((client_3.state = WAIT | client_3.state = SERVICING) & (client_3.K > 0)) & !is_timer_locked;
+    can_dec_4 := ((client_4.state = WAIT | client_4.state = SERVICING) & (client_4.K > 0)) & !is_timer_locked;
+    can_dec_5 := ((client_5.state = WAIT | client_5.state = SERVICING) & (client_5.K > 0)) & !is_timer_locked;
+
+    -- Нужно ли заблокировать глобальный счетчик времени через один шаг для того,
+    -- чтобы клиенты поменяли свой статус (освободили занятое окно).
+    freze_time_1 := can_dec_1 & ((client_1.K - 1) <= 0);
+    freze_time_2 := can_dec_2 & ((client_2.K - 1) <= 0);
+    freze_time_3 := can_dec_3 & ((client_3.K - 1) <= 0);
+    freze_time_4 := can_dec_4 & ((client_4.K - 1) <= 0);
+    freze_time_5 := can_dec_5 & ((client_5.K - 1) <= 0);
+
+ASSIGN
+    init(M) := _M;
+    
+    init(windows[1]) := 0;
+    init(windows[2]) := 0;
+    init(windows[3]) := 0;
+
+    init(client_states[1]) := NOT_COME; init(client_states[2]) := NOT_COME; init(client_states[3]) := NOT_COME;
+    init(client_states[4]) := NOT_COME; init(client_states[5]) := NOT_COME;
+    
+    init(timer_lock[1]) := FALSE; init(timer_lock[2]) := FALSE; init(timer_lock[3]) := FALSE;
+    init(timer_lock[4]) := FALSE; init(timer_lock[5]) := FALSE;
+
+    -- Выполняет роль глобального времени, изменяющего значения всем за один проход.
+
+    next(client_1.K) := case can_dec_1 : client_1.K - 1; TRUE : client_1.K; esac;
+    next(client_2.K) := case can_dec_2 : client_2.K - 1; TRUE : client_2.K; esac;
+    next(client_3.K) := case can_dec_3 : client_3.K - 1; TRUE : client_3.K; esac;
+    next(client_4.K) := case can_dec_4 : client_4.K - 1; TRUE : client_4.K; esac;
+    next(client_5.K) := case can_dec_5 : client_5.K - 1; TRUE : client_5.K; esac;
+
+    next(timer_lock[1]) := case freze_time_1 : TRUE; TRUE : timer_lock[1]; esac;
+    next(timer_lock[2]) := case freze_time_2 : TRUE; TRUE : timer_lock[2]; esac;
+    next(timer_lock[3]) := case freze_time_3 : TRUE; TRUE : timer_lock[3]; esac;
+    next(timer_lock[4]) := case freze_time_4 : TRUE; TRUE : timer_lock[4]; esac;
+    next(timer_lock[5]) := case freze_time_5 : TRUE; TRUE : timer_lock[5]; esac;
+
+-- Клиент никогда не напишут жалобы.
+SPEC
+    AG !((client_1.state = COMPLAIN) | (client_2.state = COMPLAIN) | (client_3.state = COMPLAIN) |
+         (client_4.state = COMPLAIN) | (client_5.state = COMPLAIN))
+
+FAIRNESS running
+
+-- Каждый клиент обслужится хотя бы один раз.
+
+-- ----------------------------------------------------------------------
+-- ------------------------------- CLIENT
+-- ----------------------------------------------------------------------
+
+MODULE client(i, M, main)
+
+VAR
+    K : 0..main._K; -- Время ожидания, а затем и обслуживания клиента.
+
+DEFINE
+    state := main.client_states[i]; -- Текущее состояние клиента.
+
+    -- Определяют для каждого места в зале ожидания, следующий ли в очереди клиент, занявший его.
+    nq_1 := (i = 1) & !(main.client_2.state = WAIT & main.client_2.K < K) & !(main.client_3.state = WAIT & main.client_3.K < K)
+                    & !(main.client_4.state = WAIT & main.client_4.K < K) & !(main.client_5.state = WAIT & main.client_5.K < K);
+    nq_2 := (i = 2) & !(main.client_1.state = WAIT & main.client_1.K < K) & !(main.client_3.state = WAIT & main.client_3.K < K)
+                    & !(main.client_4.state = WAIT & main.client_4.K < K) & !(main.client_5.state = WAIT & main.client_5.K < K);
+    nq_3 := (i = 3) & !(main.client_1.state = WAIT & main.client_1.K < K) & !(main.client_2.state = WAIT & main.client_2.K < K)
+                    & !(main.client_4.state = WAIT & main.client_4.K < K) & !(main.client_5.state = WAIT & main.client_5.K < K);           
+    nq_4 := (i = 4) & !(main.client_1.state = WAIT & main.client_1.K < K) & !(main.client_2.state = WAIT & main.client_2.K < K)
+                    & !(main.client_3.state = WAIT & main.client_3.K < K) & !(main.client_5.state = WAIT & main.client_5.K < K); 
+    nq_5 := (i = 5) & !(main.client_1.state = WAIT & main.client_1.K < K) & !(main.client_2.state = WAIT & main.client_2.K < K)
+                    & !(main.client_3.state = WAIT & main.client_3.K < K) & !(main.client_4.state = WAIT & main.client_4.K < K); 
+
+    -- Следующий ли данный клиент в очереди на обслуживание.
+    next_in_queue := nq_1 | nq_2 | nq_3 | nq_4 | nq_5;
+
+ASSIGN
+    init(K) := 0;
+    
+    next(main.M) := case
+        (state = JUST_COME) & (M > 0)       : M - 1;
+        (state = SERVICED)  & (M < main._M) : M + 1;
+        TRUE                                : M;
+    esac;
+
+    next(K) := case
+        (state = JUST_COME) & (M > 0)       : main._K;  -- Очередное время ожидания клиента.
+        (state = READY)                     : 1..3;     -- Очередное время обслуживания клиента.
+        TRUE                                : K;
+    esac;
+
+    next(main.client_states[i]) := case
+        -- клиент еще не пришел; пока время заморожено, новые не приходят
+        (state = NOT_COME) & (M > 0) & (!main.is_timer_locked)                  : { NOT_COME, JUST_COME };
+        -- клиент приходит в зал
+        (state = JUST_COME) & (M = 0)                                           : NOT_COME;
+        (state = JUST_COME) & (M > 0)                                           : WAIT;
+        -- превышено время ожидания клиента
+        (state = WAIT) & (K = 0)                                                : COMPLAIN;
+        (state = COMPLAIN)                                                      : NOT_COME;
+        -- клиент начинает обслуживаться
+        (state = WAIT) & (K > 0) & (main.free_windows) & (next_in_queue)        : READY;
+        (state = READY)                                                         : SERVICING;
+        -- клиент завершает обслуживаться
+        (state = SERVICING) & (K = 0)                                           : SERVICED;
+        (state = SERVICED)                                                      : NOT_COME;
+        TRUE                                                                    : state;
+    esac;
+
+    -- Будем останавливать счет времени в следующих случаях:
+
+    next(main.timer_lock[i]) := case
+        -- Клиент переходит в режим ожидания. Если след. процессом будет выбран таймер,
+        -- у клиента мгновенно уменшиться счетчик ожидания на 1. Поэтому пока надо заблокировать таймер,
+        -- чтобы дать возможность клиенту выбрать окно.
+        (state = JUST_COME) & (M > 0)                                           : TRUE;
+        -- Клиент идет к окну обслуживания.
+        (state = READY)
+            | ((state = WAIT) & (K > 0) & main.free_windows & next_in_queue)    : TRUE;
+        -- Клиент уходит и освобождает окно.
+        (state = SERVICED) | ((state = SERVICING) & (K = 0))                    : TRUE;
+        -- В остальных случах не следует блокировать время.
+        TRUE                                                                    : FALSE;
+    esac;
+
+    -- Окна занимаются в приоритете возрастания номеров: 1 -> 2 -> ...
+
+    next(main.windows[1]) := case
+        (next_in_queue) & (state = WAIT) & (K > 0) & (main.win_1 = 0)           : i mod main._M;
+        (state = SERVICED) & (main.win_1 = i)                                   : 0;
+        TRUE                                                                    : main.win_1;
+    esac;
+
+    next(main.windows[2]) := case
+        (next_in_queue) & (state = WAIT) & (K > 0)
+            & (main.win_2 = 0) & (main.win_1 != 0)                              : i mod main._M;
+        (state = SERVICED) & (main.win_2 = i)                                   : 0;
+        TRUE                                                                    : main.win_2;
+    esac;
+
+    next(main.windows[3]) := case
+        (next_in_queue) & (state = WAIT) & (K > 0)
+            & (main.win_3 = 0) & (main.win_2 != 0) & (main.win_1 != 0)          : i mod main._M;
+        (state = SERVICED) & (main.win_3 = i)                                   : 0;
+        TRUE                                                                    : main.win_3;
+    esac;
+
+FAIRNESS running
