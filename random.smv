@@ -97,26 +97,31 @@ ASSIGN
     next(timer_lock[4]) := case freze_time_4 : TRUE; TRUE : timer_lock[4]; esac;
     next(timer_lock[5]) := case freze_time_5 : TRUE; TRUE : timer_lock[5]; esac;
 
--- Клиент никогда не напишут жалобы.
--- SPEC
+FAIRNESS running;
+-- JUSTICE TRUE; -- Исключает из проверки конечные пути. Проверяются только бесконечные (см. стр. 39 - NuSMV user manual).
+
+-- Клиенты никогда не напишут жалобы.
+-- CTLSPEC
 --     AG !((client_1.state = COMPLAIN) | (client_2.state = COMPLAIN) | (client_3.state = COMPLAIN) |
 --          (client_4.state = COMPLAIN) | (client_5.state = COMPLAIN))
 
--- Если клиент ожидает, он либо пожалуется, либо будет обслужен.
-
-
--- LTLSPEC
---     G   ((client_1.state = WAIT -> X client_1.state = READY)            &
---          (client_1.state = READY -> X client_1.state = SERVICING)       &
---          (client_1.state = SERVICING -> X client_1.state = SERVICED))
-
--- LTLSPEC
---     G   ((client_1.state = WAIT
---             & (client_2.state = NOT_COME) -> (client_1.state = SERVICING) U (cli))
-
-FAIRNESS running
+-- Не существует такого пути, что клиенты, пришедшие позже, начнут обслуживаться раньше.
+-- Поскольку все клиенты равны, возьмем за образец только двоих.
+-- Формулировка:
+-- Для всех путей и будущих состояний должно быть верно: если клиент-1 и клиент-2 ожидают своей очереди, при этом клиент-1 пришел раньше,
+-- то не может быть такого развития событий, чтобы клиент-1 ждал, пока клиент-2 начал обслуживаться. 
+CTLSPEC
+    AG (((client_1.state = WAIT & client_2.state = WAIT) & (client_1.K < client_2.K))
+        -> !E[(client_1.state = WAIT) U (client_2.state = READY | client_2.state = SERVICING)])
 
 -- Каждый клиент обслужится хотя бы один раз.
+LTLSPEC
+    G(F(client_1.state = SERVICED)) & G(F(client_2.state = SERVICED)) & G(F(client_3.state = SERVICED)) &
+    G(F(client_4.state = SERVICED)) & G(F(client_5.state = SERVICED))
+
+-- Если таймер заблокирован, когда-нибудь он разблокируется.
+-- LTLSPEC
+--     G (is_timer_locked -> F !is_timer_locked)
 
 -- ----------------------------------------------------------------------
 -- ------------------------------- CLIENT
@@ -199,4 +204,4 @@ ASSIGN
         TRUE                                                                    : main.win_3;
     esac;
 
-FAIRNESS running
+FAIRNESS running;
