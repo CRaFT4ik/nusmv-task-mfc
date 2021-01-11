@@ -1,0 +1,90 @@
+-- specification (((( F client_1.state = SERVICED &  F client_2.state = SERVICED) &  F client_3.state = SERVICED) &  F client_4.state = SERVICED) &  F client_5.state = SERVICED)  is false
+-- as demonstrated by the following execution sequence
+Trace Description: LTL Counterexample 
+Trace Type: Counterexample 
+  -- Loop starts here
+  -> State: 1.1 <-
+    client_1.K = 0
+    client_2.K = 0
+    client_3.K = 0
+    client_4.K = 0
+    client_5.K = 0
+    timer_lock[1] = FALSE
+    timer_lock[2] = FALSE
+    timer_lock[3] = FALSE
+    timer_lock[4] = FALSE
+    timer_lock[5] = FALSE
+    M = 5
+    client_states[1] = NOT_COME
+    client_states[2] = NOT_COME
+    client_states[3] = NOT_COME
+    client_states[4] = NOT_COME
+    client_states[5] = NOT_COME
+    windows[1] = 0
+    windows[2] = 0
+    windows[3] = 0
+    freze_time_5 = FALSE
+    freze_time_4 = FALSE
+    freze_time_3 = FALSE
+    freze_time_2 = FALSE
+    freze_time_1 = FALSE
+    can_dec_5 = FALSE
+    can_dec_4 = FALSE
+    can_dec_3 = FALSE
+    can_dec_2 = FALSE
+    can_dec_1 = FALSE
+    is_timer_locked = FALSE
+    can_take_window = FALSE
+    free_windows = TRUE
+    win_3 = 0
+    win_2 = 0
+    win_1 = 0
+    _K = 6
+    _M = 5
+    client_1.state = NOT_COME
+    client_2.state = NOT_COME
+    client_3.state = NOT_COME
+    client_4.state = NOT_COME
+    client_5.state = NOT_COME
+  -> Input: 1.2 <-
+    _process_selector_ = client_1
+    running = FALSE
+    client_5.running = FALSE
+    client_4.running = FALSE
+    client_3.running = FALSE
+    client_2.running = FALSE
+    client_1.running = TRUE
+  -- Loop starts here
+  -> State: 1.2 <-
+  -> Input: 1.3 <-
+    _process_selector_ = client_2
+    client_2.running = TRUE
+    client_1.running = FALSE
+  -- Loop starts here
+  -> State: 1.3 <-
+  -> Input: 1.4 <-
+    _process_selector_ = client_3
+    client_3.running = TRUE
+    client_2.running = FALSE
+  -- Loop starts here
+  -> State: 1.4 <-
+  -> Input: 1.5 <-
+    _process_selector_ = client_4
+    client_4.running = TRUE
+    client_3.running = FALSE
+  -- Loop starts here
+  -> State: 1.5 <-
+  -> Input: 1.6 <-
+    _process_selector_ = client_5
+    client_5.running = TRUE
+    client_4.running = FALSE
+  -- Loop starts here
+  -> State: 1.6 <-
+  -> Input: 1.7 <-
+    _process_selector_ = main
+    running = TRUE
+    client_5.running = FALSE
+  -- Loop starts here
+  -> State: 1.7 <-
+  -> Input: 1.8 <-
+  -> State: 1.8 <-

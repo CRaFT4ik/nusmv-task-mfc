@@ -15,7 +15,7 @@ VAR
     client_2 : process client(2, M, self);
     client_3 : process client(3, M, self);
     client_4 : process client(4, M, self);
-    client_5 : process client(5, M, self);
+    client_5 : process client(5, M, self); -- 3
 
     -- Замок для остановки хода глобального счетчика времени;
     -- Каждый клиент обладает своим замком.
@@ -33,7 +33,7 @@ VAR
     client_states : array 1.._M of { NOT_COME, JUST_COME, WAIT, READY, SERVICING, SERVICED, COMPLAIN };
 
     -- Окна обслуживания: 0 - окно свободно; i - окно занято клиентом i.
-    windows : array 1..3 of 0.._M;
+    windows : array 1..3 of 0.._M; -- 2
 
 DEFINE
     _M := 5;    -- Макс. количество свободных мест в зале ожидания (равно кол-ву процессов-клиентов).
@@ -98,26 +98,30 @@ ASSIGN
     next(timer_lock[5]) := case freze_time_5 : TRUE; TRUE : timer_lock[5]; esac;
 
 FAIRNESS running;
--- JUSTICE TRUE; -- Исключает из проверки конечные пути. Проверяются только бесконечные (см. стр. 39 - NuSMV user manual).
+JUSTICE TRUE; -- Исключает из проверки конечные пути. Проверяются только бесконечные (см. стр. 39 - NuSMV user manual).
 
 -- Клиенты никогда не напишут жалобы.
--- CTLSPEC
---     AG !((client_1.state = COMPLAIN) | (client_2.state = COMPLAIN) | (client_3.state = COMPLAIN) |
---          (client_4.state = COMPLAIN) | (client_5.state = COMPLAIN))
+CTLSPEC
+    AG !((client_1.state = COMPLAIN) | (client_2.state = COMPLAIN) | (client_3.state = COMPLAIN) |
+         (client_4.state = COMPLAIN) | (client_5.state = COMPLAIN))
 
 -- Не существует такого пути, что клиенты, пришедшие позже, начнут обслуживаться раньше.
 -- Поскольку все клиенты равны, возьмем за образец только двоих.
 -- Формулировка:
 -- Для всех путей и будущих состояний должно быть верно: если клиент-1 и клиент-2 ожидают своей очереди, при этом клиент-1 пришел раньше,
 -- то не может быть такого развития событий, чтобы клиент-1 ждал, пока клиент-2 начал обслуживаться. 
-CTLSPEC
-    AG (((client_1.state = WAIT & client_2.state = WAIT) & (client_1.K < client_2.K))
-        -> !E[(client_1.state = WAIT) U (client_2.state = READY | client_2.state = SERVICING)])
+-- CTLSPEC
+--     AG (((client_1.state = WAIT & client_2.state = WAIT) & (client_1.K < client_2.K))
+--         -> !E[(client_1.state = WAIT) U (client_2.state = READY | client_2.state = SERVICING)])
+
+LTLSPEC
+    ! F (((client_1.state = WAIT & client_2.state = WAIT) & client_1.K < client_2.K)
+        -> X (client_1.state = WAIT & (client_2.state = READY | client_2.state = SERVICING)))
 
 -- Каждый клиент обслужится хотя бы один раз.
 LTLSPEC
-    G(F(client_1.state = SERVICED)) & G(F(client_2.state = SERVICED)) & G(F(client_3.state = SERVICED)) &
-    G(F(client_4.state = SERVICED)) & G(F(client_5.state = SERVICED))
+    F(client_1.state = SERVICED) & F(client_2.state = SERVICED) & F(client_3.state = SERVICED) &
+    F(client_4.state = SERVICED) & F(client_5.state = SERVICED)
 
 -- Если таймер заблокирован, когда-нибудь он разблокируется.
 -- LTLSPEC

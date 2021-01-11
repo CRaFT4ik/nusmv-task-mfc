@@ -97,7 +97,8 @@ ASSIGN
     next(timer_lock[4]) := case freze_time_4 : TRUE; TRUE : timer_lock[4]; esac;
     next(timer_lock[5]) := case freze_time_5 : TRUE; TRUE : timer_lock[5]; esac;
 
-FAIRNESS running
+FAIRNESS running;
+JUSTICE TRUE;
 
 -- Клиенты никогда не напишут жалобы.
 -- CTLSPEC
@@ -111,12 +112,17 @@ FAIRNESS running
 -- то не может быть такого развития событий, чтобы клиент-1 ждал, пока клиент-2 начал обслуживаться. 
 CTLSPEC
     AG (((client_1.state = WAIT & client_2.state = WAIT) & (client_1.K < client_2.K))
-        -> !E[(client_1.state = WAIT) U (client_2.state = READY | client_2.state = SERVICING)])
+        -> AF !E[(client_1.state = WAIT) U (client_2.state = READY | client_2.state = SERVICING)])
+
+LTLSPEC
+    G (((client_1.state = WAIT & client_2.state = WAIT) & (client_1.K < client_2.K))
+        -> X F !((client_1.state = WAIT) U (client_2.state = READY | client_2.state = SERVICING))) &
+    F ((client_1.state = WAIT & client_2.state = WAIT) & (client_1.K < client_2.K))
 
 -- Каждый клиент обслужится хотя бы один раз.
 LTLSPEC
-    G(F(client_1.state = SERVICED)) & G(F(client_2.state = SERVICED)) & G(F(client_3.state = SERVICED)) &
-    G(F(client_4.state = SERVICED)) & G(F(client_5.state = SERVICED))
+    F(client_1.state = SERVICED) & F(client_2.state = SERVICED) & F(client_3.state = SERVICED) &
+    F(client_4.state = SERVICED) & F(client_5.state = SERVICED)
 
 -- ----------------------------------------------------------------------
 -- ------------------------------- CLIENT

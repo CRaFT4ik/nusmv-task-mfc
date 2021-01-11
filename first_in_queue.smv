@@ -97,7 +97,8 @@ ASSIGN
     next(timer_lock[4]) := case freze_time_4 : TRUE; TRUE : timer_lock[4]; esac;
     next(timer_lock[5]) := case freze_time_5 : TRUE; TRUE : timer_lock[5]; esac;
 
-FAIRNESS running
+FAIRNESS running;
+JUSTICE TRUE;
 
 -- Клиенты никогда не напишут жалобы.
 -- CTLSPEC
