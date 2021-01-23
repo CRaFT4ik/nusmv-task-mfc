@@ -1,0 +1,1 @@
+-- specification !( F (((client_1.state = WAIT & client_2.state = WAIT) & client_1.K < client_2.K) &  X ( X ( X (client_1.state = WAIT & client_2.state = READY)))))  is true

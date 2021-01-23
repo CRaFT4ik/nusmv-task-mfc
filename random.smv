@@ -118,6 +118,16 @@ LTLSPEC
     ! F (((client_1.state = WAIT & client_2.state = WAIT) & client_1.K < client_2.K)
         -> X (client_1.state = WAIT & (client_2.state = READY | client_2.state = SERVICING)))
 
+-- Если все выражение FALSE, значит есть контрпример
+
+-- <-> (client_1.state = WAIT & client_2.state = WAIT & client_1.K < client_2.K)
+--        & X (client_1.state != WAIT | (client_2.state != READY & client_2.state != SERVICING))
+
+-- Контрпример:
+-- (client_2.state = JUST_COME & K = 0) & (client_1.state = WAIT & K = 6)
+
+-- UPD: ! F (((client_1.state = WAIT & client_2.state = WAIT) & client_1.K < client_2.K) & X (client_1.state = WAIT & client_2.state = READY))
+
 -- Каждый клиент обслужится хотя бы один раз.
 LTLSPEC
     F(client_1.state = SERVICED) & F(client_2.state = SERVICED) & F(client_3.state = SERVICED) &
@@ -155,7 +165,8 @@ ASSIGN
     esac;
 
     next(main.client_states[i]) := case
-        -- клиент еще не пришел; пока время заморожено, новые не приходят
+        -- клиент еще не пришел; нет клиентов - обязательно кто-то придет; пока время заморожено, новые не приходят
+        (state = NOT_COME) & (M = main._M)                                      : JUST_COME;
         (state = NOT_COME) & (M > 0) & (!main.is_timer_locked)                  : { NOT_COME, JUST_COME };
         -- клиент приходит в зал
         (state = JUST_COME) & (M = 0)                                           : NOT_COME;

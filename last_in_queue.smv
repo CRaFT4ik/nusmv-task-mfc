@@ -168,6 +168,7 @@ ASSIGN
 
     next(main.client_states[i]) := case
         -- клиент еще не пришел; пока время заморожено, новые не приходят
+        (state = NOT_COME) & (M = main._M)                                      : JUST_COME;
         (state = NOT_COME) & (M > 0) & (!main.is_timer_locked)                  : { NOT_COME, JUST_COME };
         -- клиент приходит в зал
         (state = JUST_COME) & (M = 0)                                           : NOT_COME;
