@@ -1,1 +1,0 @@
--- specification AG (((client_1.state = WAIT & client_2.state = WAIT) & client_1.K < client_2.K) -> AF !E [ client_1.state = WAIT U (client_2.state = READY | client_2.state = SERVICING) ] )  is true
