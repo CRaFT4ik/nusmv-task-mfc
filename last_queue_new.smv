@@ -121,6 +121,10 @@ ASSIGN
 FAIRNESS running;
 --JUSTICE TRUE; -- Исключает из проверки конечные пути. Проверяются только бесконечные (см. стр. 39 - NuSMV user manual).
 
+-- Если таймер заблокирован, он когда-нибудь разблокируется.
+CTLSPEC
+    AG (is_timer_locked -> AF !is_timer_locked)
+
 -- Клиенты никогда не напишут жалобы.
 CTLSPEC
     AG  !(
