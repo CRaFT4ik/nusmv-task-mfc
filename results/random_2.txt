@@ -1,0 +1,453 @@
+-- specification AG !(((client_1.state = COMPLAIN | client_2.state = COMPLAIN) | client_3.state = COMPLAIN) | client_4.state = COMPLAIN)  is false
+-- as demonstrated by the following execution sequence
+Trace Description: CTL Counterexample 
+Trace Type: Counterexample 
+  -> State: 2.1 <-
+    client_1.K = 0
+    client_1.C = 0
+    client_2.K = 0
+    client_2.C = 0
+    client_3.K = 0
+    client_3.C = 0
+    client_4.K = 0
+    client_4.C = 0
+    timer_lock[1] = FALSE
+    timer_lock[2] = FALSE
+    timer_lock[3] = FALSE
+    timer_lock[4] = FALSE
+    M = 4
+    client_states[1] = NOT_COME
+    client_states[2] = NOT_COME
+    client_states[3] = NOT_COME
+    client_states[4] = NOT_COME
+    windows[1] = 0
+    windows[2] = 0
+    tick_happened = FALSE
+    freze_time_4 = FALSE
+    freze_time_3 = FALSE
+    freze_time_2 = FALSE
+    freze_time_1 = FALSE
+    can_dec_4C = FALSE
+    can_dec_3C = FALSE
+    can_dec_2C = FALSE
+    can_dec_1C = FALSE
+    can_dec_4K = FALSE
+    can_dec_3K = FALSE
+    can_dec_2K = FALSE
+    can_dec_1K = FALSE
+    is_timer_locked = TRUE
+    can_take_window = TRUE
+    free_windows = TRUE
+    win_2 = 0
+    win_1 = 0
+    _K = 4
+    _W = 2
+    _M = 4
+    client_1.is_client_serviced = FALSE
+    client_1.is_client_can_go_to_window = FALSE
+    client_1.is_client_will_leave = FALSE
+    client_1.is_client_will_complain = FALSE
+    client_1.is_client_can_come = TRUE
+    client_1.M = 4
+    client_1.state = NOT_COME
+    client_2.is_client_serviced = FALSE
+    client_2.is_client_can_go_to_window = FALSE
+    client_2.is_client_will_leave = FALSE
+    client_2.is_client_will_complain = FALSE
+    client_2.is_client_can_come = TRUE
+    client_2.M = 4
+    client_2.state = NOT_COME
+    client_3.is_client_serviced = FALSE
+    client_3.is_client_can_go_to_window = FALSE
+    client_3.is_client_will_leave = FALSE
+    client_3.is_client_will_complain = FALSE
+    client_3.is_client_can_come = TRUE
+    client_3.M = 4
+    client_3.state = NOT_COME
+    client_4.is_client_serviced = FALSE
+    client_4.is_client_can_go_to_window = FALSE
+    client_4.is_client_will_leave = FALSE
+    client_4.is_client_will_complain = FALSE
+    client_4.is_client_can_come = TRUE
+    client_4.M = 4
+    client_4.state = NOT_COME
+  -> Input: 2.2 <-
+    _process_selector_ = client_1
+    running = FALSE
+    client_4.running = FALSE
+    client_3.running = FALSE
+    client_2.running = FALSE
+    client_1.running = TRUE
+  -> State: 2.2 <-
+    client_1.K = 4
+    timer_lock[1] = TRUE
+    M = 3
+    client_states[1] = WAIT
+    client_1.is_client_can_go_to_window = TRUE
+    client_1.is_client_can_come = FALSE
+    client_1.M = 3
+    client_1.state = WAIT
+    client_2.M = 3
+    client_3.M = 3
+    client_4.M = 3
+  -> Input: 2.3 <-
+    _process_selector_ = client_3
+    client_3.running = TRUE
+    client_1.running = FALSE
+  -> State: 2.3 <-
+    client_3.K = 4
+    timer_lock[3] = TRUE
+    M = 2
+    client_states[3] = WAIT
+    client_1.M = 2
+    client_2.M = 2
+    client_3.is_client_can_go_to_window = TRUE
+    client_3.is_client_can_come = FALSE
+    client_3.M = 2
+    client_3.state = WAIT
+    client_4.M = 2
+  -> Input: 2.4 <-
+    _process_selector_ = client_4
+    client_4.running = TRUE
+    client_3.running = FALSE
+  -> State: 2.4 <-
+    client_4.K = 4
+    timer_lock[4] = TRUE
+    M = 1
+    client_states[4] = WAIT
+    client_1.M = 1
+    client_2.M = 1
+    client_3.M = 1
+    client_4.is_client_can_go_to_window = TRUE
+    client_4.is_client_can_come = FALSE
+    client_4.M = 1
+    client_4.state = WAIT
+  -> Input: 2.5 <-
+    _process_selector_ = client_3
+    client_4.running = FALSE
+    client_3.running = TRUE
+  -> State: 2.5 <-
+    client_3.K = 0
+    client_3.C = 3
+    timer_lock[3] = FALSE
+    client_states[3] = SERVICING
+    windows[1] = 3
+    win_1 = 3
+    client_3.is_client_can_go_to_window = FALSE
+    client_3.state = SERVICING
+  -> Input: 2.6 <-
+    _process_selector_ = client_1
+    client_3.running = FALSE
+    client_1.running = TRUE
+  -> State: 2.6 <-
+    client_1.K = 0
+    client_1.C = 2
+    timer_lock[1] = FALSE
+    client_states[1] = SERVICING
+    windows[2] = 1
+    can_take_window = FALSE
+    free_windows = FALSE
+    win_2 = 1
+    client_1.is_client_can_go_to_window = FALSE
+    client_1.state = SERVICING
+    client_4.is_client_can_go_to_window = FALSE
+  -> Input: 2.7 <-
+    _process_selector_ = client_4
+    client_4.running = TRUE
+    client_1.running = FALSE
+  -> State: 2.7 <-
+    timer_lock[4] = FALSE
+    tick_happened = TRUE
+    freze_time_4 = TRUE
+    freze_time_3 = TRUE
+    freze_time_1 = TRUE
+    can_dec_3C = TRUE
+    can_dec_1C = TRUE
+    can_dec_4K = TRUE
+    is_timer_locked = FALSE
+  -> Input: 2.8 <-
+    _process_selector_ = main
+    running = TRUE
+    client_4.running = FALSE
+  -> State: 2.8 <-
+    client_1.C = 1
+    client_3.C = 2
+    client_4.K = 3
+    timer_lock[1] = TRUE
+    timer_lock[2] = TRUE
+    timer_lock[3] = TRUE
+    timer_lock[4] = TRUE
+    tick_happened = FALSE
+    freze_time_4 = FALSE
+    freze_time_3 = FALSE
+    freze_time_1 = FALSE
+    can_dec_3C = FALSE
+    can_dec_1C = FALSE
+    can_dec_4K = FALSE
+    is_timer_locked = TRUE
+  -> Input: 2.9 <-
+    _process_selector_ = client_2
+    running = FALSE
+    client_2.running = TRUE
+  -> State: 2.9 <-
+    client_2.K = 4
+    M = 0
+    client_states[2] = WAIT
+    client_1.M = 0
+    client_2.is_client_can_come = FALSE
+    client_2.M = 0
+    client_2.state = WAIT
+    client_3.M = 0
+    client_4.M = 0
+  -> Input: 2.10 <-
+    _process_selector_ = client_4
+    client_4.running = TRUE
+    client_2.running = FALSE
+  -> State: 2.10 <-
+    timer_lock[4] = FALSE
+  -> Input: 2.11 <-
+    _process_selector_ = client_3
+    client_4.running = FALSE
+    client_3.running = TRUE
+  -> State: 2.11 <-
+    timer_lock[3] = FALSE
+  -> Input: 2.12 <-
+    _process_selector_ = client_2
+    client_3.running = FALSE
+    client_2.running = TRUE
+  -> State: 2.12 <-
+    timer_lock[2] = FALSE
+  -> Input: 2.13 <-
+    _process_selector_ = client_1
+    client_2.running = FALSE
+    client_1.running = TRUE
+  -> State: 2.13 <-
+    timer_lock[1] = FALSE
+    tick_happened = TRUE
+    freze_time_4 = TRUE
+    freze_time_3 = TRUE
+    freze_time_2 = TRUE
+    freze_time_1 = TRUE
+    can_dec_3C = TRUE
+    can_dec_1C = TRUE
+    can_dec_4K = TRUE
+    can_dec_2K = TRUE
+    is_timer_locked = FALSE
+  -> Input: 2.14 <-
+    _process_selector_ = main
+    running = TRUE
+    client_1.running = FALSE
+  -> State: 2.14 <-
+    client_1.C = 0
+    client_2.K = 3
+    client_3.C = 1
+    client_4.K = 2
+    timer_lock[1] = TRUE
+    timer_lock[2] = TRUE
+    timer_lock[3] = TRUE
+    timer_lock[4] = TRUE
+    tick_happened = FALSE
+    freze_time_4 = FALSE
+    freze_time_3 = FALSE
+    freze_time_2 = FALSE
+    freze_time_1 = FALSE
+    can_dec_3C = FALSE
+    can_dec_1C = FALSE
+    can_dec_4K = FALSE
+    can_dec_2K = FALSE
+    is_timer_locked = TRUE
+    client_1.is_client_serviced = TRUE
+  -> Input: 2.15 <-
+    _process_selector_ = client_4
+    running = FALSE
+    client_4.running = TRUE
+  -> State: 2.15 <-
+    timer_lock[4] = FALSE
+  -> Input: 2.16 <-
+    _process_selector_ = client_1
+    client_4.running = FALSE
+    client_1.running = TRUE
+  -> State: 2.16 <-
+    client_states[1] = SERVICED
+    windows[2] = 0
+    can_take_window = TRUE
+    free_windows = TRUE
+    win_2 = 0
+    client_1.is_client_serviced = FALSE
+    client_1.is_client_will_leave = TRUE
+    client_1.state = SERVICED
+    client_2.is_client_can_go_to_window = TRUE
+    client_4.is_client_can_go_to_window = TRUE
+  -> Input: 2.17 <-
+    _process_selector_ = client_3
+    client_3.running = TRUE
+    client_1.running = FALSE
+  -> State: 2.17 <-
+    timer_lock[3] = FALSE
+  -> Input: 2.18 <-
+    _process_selector_ = client_1
+    client_3.running = FALSE
+    client_1.running = TRUE
+  -> State: 2.18 <-
+    timer_lock[1] = FALSE
+    M = 1
+    client_states[1] = NOT_COME
+    client_1.is_client_will_leave = FALSE
+    client_1.is_client_can_come = TRUE
+    client_1.M = 1
+    client_1.state = NOT_COME
+    client_2.M = 1
+    client_3.M = 1
+    client_4.M = 1
+  -> Input: 2.19 <-
+    _process_selector_ = client_2
+    client_2.running = TRUE
+    client_1.running = FALSE
+  -> State: 2.19 <-
+    client_2.K = 0
+    client_2.C = 3
+    timer_lock[2] = FALSE
+    client_states[2] = SERVICING
+    windows[2] = 2
+    tick_happened = TRUE
+    freze_time_4 = TRUE
+    freze_time_3 = TRUE
+    freze_time_2 = TRUE
+    can_dec_3C = TRUE
+    can_dec_2C = TRUE
+    can_dec_4K = TRUE
+    is_timer_locked = FALSE
+    can_take_window = FALSE
+    free_windows = FALSE
+    win_2 = 2
+    client_2.is_client_can_go_to_window = FALSE
+    client_2.state = SERVICING
+    client_4.is_client_can_go_to_window = FALSE
+  -> Input: 2.20 <-
+    _process_selector_ = main
+    running = TRUE
+    client_2.running = FALSE
+  -> State: 2.20 <-
+    client_2.C = 2
+    client_3.C = 0
+    client_4.K = 1
+    timer_lock[1] = TRUE
+    timer_lock[2] = TRUE
+    timer_lock[3] = TRUE
+    timer_lock[4] = TRUE
+    tick_happened = FALSE
+    freze_time_4 = FALSE
+    freze_time_3 = FALSE
+    freze_time_2 = FALSE
+    can_dec_3C = FALSE
+    can_dec_2C = FALSE
+    can_dec_4K = FALSE
+    is_timer_locked = TRUE
+    client_3.is_client_serviced = TRUE
+  -> Input: 2.21 <-
+    _process_selector_ = client_1
+    running = FALSE
+    client_1.running = TRUE
+  -> State: 2.21 <-
+    client_1.K = 4
+    M = 0
+    client_states[1] = WAIT
+    client_1.is_client_can_come = FALSE
+    client_1.M = 0
+    client_1.state = WAIT
+    client_2.M = 0
+    client_3.M = 0
+    client_4.M = 0
+  -> Input: 2.22 <-
+    _process_selector_ = client_4
+    client_4.running = TRUE
+    client_1.running = FALSE
+  -> State: 2.22 <-
+    timer_lock[4] = FALSE
+  -> Input: 2.23 <-
+    _process_selector_ = client_3
+    client_4.running = FALSE
+    client_3.running = TRUE
+  -> State: 2.23 <-
+    client_states[3] = SERVICED
+    windows[1] = 0
+    can_take_window = TRUE
+    free_windows = TRUE
+    win_1 = 0
+    client_1.is_client_can_go_to_window = TRUE
+    client_3.is_client_serviced = FALSE
+    client_3.is_client_will_leave = TRUE
+    client_3.state = SERVICED
+    client_4.is_client_can_go_to_window = TRUE
+  -> Input: 2.24 <-
+  -> State: 2.24 <-
+    timer_lock[3] = FALSE
+    M = 1
+    client_states[3] = NOT_COME
+    client_1.M = 1
+    client_2.M = 1
+    client_3.is_client_will_leave = FALSE
+    client_3.is_client_can_come = TRUE
+    client_3.M = 1
+    client_3.state = NOT_COME
+    client_4.M = 1
+  -> Input: 2.25 <-
+    _process_selector_ = client_2
+    client_3.running = FALSE
+    client_2.running = TRUE
+  -> State: 2.25 <-
+    timer_lock[2] = FALSE
+  -> Input: 2.26 <-
+    _process_selector_ = client_1
+    client_2.running = FALSE
+    client_1.running = TRUE
+  -> State: 2.26 <-
+    client_1.K = 0
+    client_1.C = 2
+    timer_lock[1] = FALSE
+    client_states[1] = SERVICING
+    windows[1] = 1
+    tick_happened = TRUE
+    freze_time_4 = TRUE
+    freze_time_2 = TRUE
+    freze_time_1 = TRUE
+    can_dec_2C = TRUE
+    can_dec_1C = TRUE
+    can_dec_4K = TRUE
+    is_timer_locked = FALSE
+    can_take_window = FALSE
+    free_windows = FALSE
+    win_1 = 1
+    client_1.is_client_can_go_to_window = FALSE
+    client_1.state = SERVICING
+    client_4.is_client_can_go_to_window = FALSE
+  -> Input: 2.27 <-
+    _process_selector_ = main
+    running = TRUE
+    client_1.running = FALSE
+  -> State: 2.27 <-
+    client_1.C = 1
+    client_2.C = 1
+    client_4.K = 0
+    timer_lock[1] = TRUE
+    timer_lock[2] = TRUE
+    timer_lock[3] = TRUE
+    timer_lock[4] = TRUE
+    tick_happened = FALSE
+    freze_time_4 = FALSE
+    freze_time_2 = FALSE
+    freze_time_1 = FALSE
+    can_dec_2C = FALSE
+    can_dec_1C = FALSE
+    can_dec_4K = FALSE
+    is_timer_locked = TRUE
+    client_4.is_client_will_complain = TRUE
+  -> Input: 2.28 <-
+    _process_selector_ = client_4
+    running = FALSE
+    client_4.running = TRUE
+  -> State: 2.28 <-
+    client_states[4] = COMPLAIN
+    client_4.is_client_will_leave = TRUE
+    client_4.is_client_will_complain = FALSE
+    client_4.state = COMPLAIN

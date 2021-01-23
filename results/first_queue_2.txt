@@ -1,0 +1,1 @@
+-- specification AG !(((client_1.state = COMPLAIN | client_2.state = COMPLAIN) | client_3.state = COMPLAIN) | client_4.state = COMPLAIN)  is true

@@ -1,0 +1,1 @@
+-- specification !( F (((client_2.state = WAIT & client_3.state = WAIT) & client_2.K < client_3.K) &  X (client_2.state = WAIT & client_3.state = SERVICING)))  is true
